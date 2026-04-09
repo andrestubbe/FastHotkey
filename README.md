@@ -32,7 +32,44 @@ If you need **system-wide hotkeys** that work **even when your app is not focuse
 
 ---
 
-## Features
+## Table of Contents
+
+- [Why FastHotkey?](#why-fasthotkey)
+- [Key Features](#key-features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [API Reference](#api-reference)
+- [Examples](#examples)
+- [Project Structure](#project-structure)
+- [Why Native Code?](#why-native-code-jni-vs-jna-vs-java-alone)
+- [Requirements](#requirements)
+- [Build from Source](#build-from-source)
+- [How It Works](#how-it-works)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+
+---
+
+## Why FastHotkey?
+
+Standard Java (**AWT**, **Swing**, **JavaFX**) **cannot register global hotkeys**:
+
+- `KeyListener` only works when your app is focused
+- `AWTEventListener` has the same limitation
+- No system-wide keyboard shortcut support
+- OS-level input throttling
+
+**FastHotkey solves this** with native Windows API integration:
+
+- **System-wide hotkeys** via `RegisterHotKey` — works even when app is not focused
+- **Low-latency input** — Direct native callbacks, no polling
+- **Multiple hotkeys** — Register unlimited shortcuts with unique IDs
+- **Auto-cleanup** — Resources freed automatically on JVM shutdown
+- **Simple callback API** — Clean lambda interface
+
+---
+
+## Key Features
 
 - **Global hotkeys**: Capture hotkeys system-wide, not just when your app is focused
 - **High performance**: Native JNI implementation - faster than JNA
@@ -40,6 +77,59 @@ If you need **system-wide hotkeys** that work **even when your app is not focuse
 - **Callback-based**: Clean lambda/callback interface for hotkey events
 - **Multiple hotkeys**: Register unlimited hotkeys with unique IDs
 - **Auto-cleanup**: Automatic resource cleanup on JVM shutdown
+
+---
+
+## Installation
+
+### Maven (JitPack)
+
+Add JitPack repository and dependency:
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+
+<dependency>
+    <groupId>com.github.andrestubbe</groupId>
+    <artifactId>fasthotkey</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+### Gradle (JitPack)
+
+Add JitPack repository and dependency:
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.andrestubbe:fasthotkey:1.0.0'
+}
+```
+
+### Direct Download
+
+Download the pre-built JAR with embedded native library:
+
+[📥 Download fasthotkey-1.0.0.jar](https://github.com/andrestubbe/FastHotkey/releases/download/v1.0.0/fasthotkey-1.0.0.jar)
+
+```batch
+# Run the demo
+java -cp fasthotkey-1.0.0.jar fasthotkey.HotkeyDemo
+
+# Use in your project
+java -cp fasthotkey-1.0.0.jar;your-project.jar your.main.Class
+```
+
+---
 
 ## Quick Start
 
@@ -218,7 +308,7 @@ FastHotkey uses **JNI** for maximum performance and to maintain consistency with
 - Java 17+
 - Visual Studio 2019+ (for building native code)
 
-## Building from Source
+## Build from Source
 
 ### Prerequisites
 
