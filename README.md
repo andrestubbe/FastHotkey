@@ -197,16 +197,20 @@ fasthotkey/
 └── README.md
 ```
 
-## JNI vs JNA Comparison
+## Why Native Code? Java vs JNI vs JNA
 
-| Aspect | JNI (FastHotkey) | JNA |
-|--------|------------------|-----|
-| **Performance** | Fastest - direct native calls | 10-50x slower (libffi overhead) |
-| **Development** | Write C++, compile per-platform | Pure Java, define interfaces |
-| **Deployment** | Bundle platform-specific DLLs | Single JAR (libffi handles it) |
-| **Maintenance** | Harder (C++ code + build scripts) | Easier (just Java interfaces) |
+**Java alone CANNOT handle global system-wide hotkeys.** The standard Java `KeyListener`, `KeyStroke`, and `AWTEventListener` only capture keystrokes when your Java application window is **focused**. To capture hotkeys globally (while other apps are focused), you need native OS APIs like Win32 `RegisterHotKey`.
 
-FastHotkey uses JNI for maximum performance - ideal for low-latency hotkey handling.
+| Aspect | Java Alone | JNI (FastHotkey) | JNA |
+|--------|-----------|------------------|-----|
+| **Global Hotkeys** | ❌ **Cannot** - only in-app | ✅ Full support | ✅ Full support |
+| **Background Capture** | ❌ **Cannot** - app must be focused | ✅ Works always | ✅ Works always |
+| **Performance** | N/A | Fastest - direct native calls | 10-50x slower (libffi overhead) |
+| **Development** | Standard Java | Write C++, compile per-platform | Pure Java, define interfaces |
+| **Deployment** | Single JAR | Bundle platform-specific DLLs | Single JAR (libffi handles it) |
+| **Maintenance** | Easiest | Harder (C++ code + build scripts) | Easier (just Java interfaces) |
+
+FastHotkey uses **JNI** for maximum performance and to maintain consistency with the FastJava ecosystem (FastClipboard, FastRobot). While JNA would work for simple hotkey registration, JNI delivers the lowest possible latency for hotkey event handling.
 
 ## Requirements
 
