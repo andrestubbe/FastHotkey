@@ -24,7 +24,7 @@ FastHotkey.register(1,
 FastHotkey.start();
 ```
 
-FastHotkey is a **high-performance Java hotkey library** that replaces `java.awt.Toolkit.getDefaultToolkit().addAWTEventListener()` with a **native Windows backend** using Win32 `RegisterHotKey` API. Built for **global system-wide hotkeys**, **background key capture**, **automation shortcuts**, and ** productivity tools**.
+FastHotkey is a **high-performance Java hotkey library** that enables **true global hotkeys** — something standard Java **cannot do**. Unlike `java.awt.Toolkit.getDefaultToolkit().addAWTEventListener()`, which only captures keystrokes when your **Java app is focused** (same limitation as `KeyListener`), FastHotkey uses the **native Windows `RegisterHotKey` API** to capture hotkeys **system-wide, even when your app is not focused**. Built for **global system-wide hotkeys**, **background key capture**, **automation shortcuts**, and **productivity tools**.
 
 **Keywords:** java hotkey alternative, global hotkeys, system-wide keyboard shortcuts, windows hotkey api, registerhotkey jni, java global hotkey listener, low-latency hotkeys, automation hotkeys, background hotkey capture, win32 hotkey
 
