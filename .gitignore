@@ -1,0 +1,36 @@
+# Build directories
+build/
+target/
+*.class
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Compiled objects and libraries
+*.obj
+*.o
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+*.exe
+
+# Maven
+.mvn/
+dependency-reduced-pom.xml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
