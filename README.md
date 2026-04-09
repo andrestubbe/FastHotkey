@@ -6,7 +6,7 @@
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![JitPack](https://jitpack.io/v/andrestubbe/FastHotkey.svg)](https://jitpack.io/#andrestubbe/FastHotkey)
+[![JitPack](https://jitpack.io/v/andrestubbe/fasthotkey.svg)](https://jitpack.io/#andrestubbe/fasthotkey)
 [![GitHub stars](https://img.shields.io/github/stars/andrestubbe/fasthotkey.svg)](https://github.com/andrestubbe/fasthotkey/stargazers)
 
 ```java
