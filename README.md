@@ -206,9 +206,9 @@ fasthotkey/
 | **Global Hotkeys** | ✅ Full support | ✅ Full support | ❌ **Cannot** - only in-app |
 | **Background Capture** | ✅ Works always | ✅ Works always | ❌ **Cannot** - app must be focused |
 | **Performance** | Fastest - direct native calls | 10-50x slower (libffi overhead) | N/A |
-| **Development** | Write C++, compile per-platform | Pure Java, define interfaces | Standard Java |
-| **Deployment** | Bundle platform-specific DLLs | Single JAR (libffi handles it) | Single JAR |
-| **Maintenance** | Harder (C++ code + build scripts) | Easier (just Java interfaces) | Easiest |
+| **Development** | Write C++, compile per-platform | Pure Java, define interfaces | N/A |
+| **Deployment** | Bundle platform-specific DLLs | Single JAR (libffi handles it) | N/A |
+| **Maintenance** | Harder (C++ code + build scripts) | Easier (just Java interfaces) | N/A |
 
 FastHotkey uses **JNI** for maximum performance and to maintain consistency with the FastJava ecosystem (FastClipboard, FastRobot). While JNA would work for simple hotkey registration, JNI delivers the lowest possible latency for hotkey event handling.
 
