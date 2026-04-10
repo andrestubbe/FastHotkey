@@ -36,7 +36,32 @@ jobs:
       with:
         files: |
           target/fasthotkey-*.jar
-        name: Release ${{ github.ref_name }}
+        name: "FastHotkey ${{ github.ref_name }} — Global System-Wide Hotkeys for Java"
+        body: |
+          ## FastHotkey ${{ github.ref_name }}
+
+          **Ultra-fast global hotkey library for Java — system-wide hotkeys even when your app is not focused**
+
+          ### What's New
+          - CLI Demo with clean output
+          - Minimized native debug output
+          - Screenshot in README
+
+          ### Run the Demo
+          ```bash
+          java -jar fasthotkey-1.0.0.jar fasthotkey.Demo
+          ```
+          Press **Ctrl+Shift+H** to test, **Ctrl+C** to exit.
+
+          ### Installation
+          **Maven:**
+          ```xml
+          <dependency>
+              <groupId>io.github.andrestubbe</groupId>
+              <artifactId>fasthotkey</artifactId>
+              <version>1.0.0</version>
+          </dependency>
+          ```
         draft: false
         prerelease: false
       env:
