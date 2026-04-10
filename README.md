@@ -99,7 +99,7 @@ Add JitPack repository and dependency:
 <dependency>
     <groupId>com.github.andrestubbe</groupId>
     <artifactId>fasthotkey</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -113,7 +113,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fasthotkey:1.0.0'
+    implementation 'com.github.andrestubbe:fasthotkey:1.1.0'
 }
 ```
 
@@ -121,14 +121,14 @@ dependencies {
 
 Download the pre-built JAR with embedded native library:
 
-[📥 Download fasthotkey-1.0.0.jar](https://github.com/andrestubbe/FastHotkey/releases/download/v1.0.0/fasthotkey-1.0.0.jar)
+[📥 Download fasthotkey-1.1.0.jar](https://github.com/andrestubbe/FastHotkey/releases/download/v1.1.0/fasthotkey-1.1.0.jar)
 
 ```batch
 # Run the demo
-java -cp fasthotkey-1.0.0.jar fasthotkey.HotkeyDemo
+java --enable-native-access=ALL-UNNAMED -cp fasthotkey-1.1.0.jar fasthotkey.Demo
 
 # Use in your project
-java -cp fasthotkey-1.0.0.jar;your-project.jar your.main.Class
+java --enable-native-access=ALL-UNNAMED -cp fasthotkey-1.1.0.jar;your-project.jar your.main.Class
 ```
 
 ---
