@@ -21,6 +21,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.3
     
     - name: Build native DLL
+      shell: cmd
       run: |
         mkdir build
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
