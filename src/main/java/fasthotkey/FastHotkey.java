@@ -99,7 +99,41 @@ public final class FastHotkey {
         if (callback == null) {
             throw new IllegalArgumentException("Callback cannot be null");
         }
-        return nativeRegisterHotkey(id, modifiers, vkCode, callback);
+        return nativeRegisterHotkey(id, modifiers, vkCode, callback, HotkeyMode.AGGRESSIVE.ordinal());
+    }
+    
+    /**
+     * Registers a global hotkey with specified interception mode.
+     * 
+     * <p>Use {@link HotkeyMode#COOPERATIVE} for "well-behaved" hotkeys that should fail
+     * if already registered by Windows or other apps.</p>
+     * 
+     * <p>Use {@link HotkeyMode#AGGRESSIVE} to override Windows hotkeys like Ctrl+Space,
+     * Win+L, or any hotkey already in use.</p>
+     * 
+     * @param id unique hotkey identifier (1 to 0xBFFF)
+     * @param modifiers modifier key combination (e.g., MOD_CONTROL | MOD_SHIFT)
+     * @param vkCode virtual key code (e.g., KeyCodes.VK_SPACE)
+     * @param callback lambda called when hotkey is pressed
+     * @param mode COOPERATIVE or AGGRESSIVE interception mode
+     * @return true if registration succeeded (COOPERATIVE may fail if hotkey taken)
+     * @throws IllegalArgumentException if id is out of range or callback is null
+     * @throws IllegalStateException if loadLibrary() was not called first
+     * @see HotkeyMode
+     * @since 1.0.0
+     */
+    public static boolean register(int id, int modifiers, int vkCode, HotkeyCallback callback, HotkeyMode mode) {
+        checkLoaded();
+        if (id < 1 || id > 0xBFFF) {
+            throw new IllegalArgumentException("Hotkey ID must be between 1 and 0xBFFF");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        if (mode == null) {
+            throw new IllegalArgumentException("Mode cannot be null");
+        }
+        return nativeRegisterHotkey(id, modifiers, vkCode, callback, mode.ordinal());
     }
     
     /**
@@ -170,7 +204,7 @@ public final class FastHotkey {
     }
     
     // Native methods
-    private static native boolean nativeRegisterHotkey(int id, int modifiers, int vkCode, HotkeyCallback callback);
+    private static native boolean nativeRegisterHotkey(int id, int modifiers, int vkCode, HotkeyCallback callback, int mode);
     private static native boolean nativeUnregisterHotkey(int id);
     private static native void nativeStartMessageLoop();
     private static native void nativeStopMessageLoop();

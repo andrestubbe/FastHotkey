@@ -20,9 +20,9 @@ public class Demo {
         FastHotkey.loadLibrary();
         
         boolean registered = FastHotkey.register(1, 
-            ModifierKeys.MOD_CONTROL | ModifierKeys.MOD_SHIFT, 
-            KeyCodes.VK_H,
-            id -> System.out.println("Ctrl+Shift+H triggered!")
+            ModifierKeys.MOD_CONTROL, 
+            KeyCodes.VK_SPACE,
+            id -> System.out.println("Ctrl+Space triggered!")
         );
         
         if (!registered) {
@@ -31,7 +31,7 @@ public class Demo {
         }
         
         FastHotkey.start();
-        System.out.println("Press Ctrl+Shift+H to test. Ctrl+C to exit.");
+        System.out.println("Press Ctrl+Space to test (overrides Windows IME). Ctrl+C to exit.");
         System.out.println();
         
         Thread.sleep(Long.MAX_VALUE);

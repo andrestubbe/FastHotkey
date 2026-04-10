@@ -211,6 +211,40 @@ boolean success = FastHotkey.register(
 - Function keys: `KeyCodes.VK_F1` through `KeyCodes.VK_F12`
 - Special keys: `VK_ESCAPE`, `VK_SPACE`, `VK_RETURN`, `VK_TAB`, etc.
 
+### Hotkey Modes
+
+FastHotkey supports two interception modes:
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `HotkeyMode.COOPERATIVE` | Uses `RegisterHotKey`. Fails if Windows or another app owns the hotkey. | "Well-behaved" hotkeys that shouldn't override system shortcuts |
+| `HotkeyMode.AGGRESSIVE` (default) | Uses low-level keyboard hook. Always works, overrides Windows hotkeys. | Ctrl+Space, Win+L, or any hotkey that must work regardless |
+
+**Default (AGGRESSIVE mode):**
+```java
+// Works even for Ctrl+Space (Windows IME), Win+L, etc.
+FastHotkey.register(1, 
+    ModifierKeys.MOD_CONTROL, 
+    KeyCodes.VK_SPACE,
+    id -> System.out.println("Ctrl+Space works!")
+);
+```
+
+**COOPERATIVE mode:**
+```java
+// Returns false if hotkey is already registered by Windows
+boolean success = FastHotkey.register(1, 
+    ModifierKeys.MOD_CONTROL, 
+    KeyCodes.VK_C,
+    id -> System.out.println("Ctrl+C"),
+    HotkeyMode.COOPERATIVE  // May fail if already taken
+);
+
+if (!success) {
+    System.out.println("Hotkey already in use by another app");
+}
+```
+
 ### Starting/Stopping
 
 ```java

@@ -34,12 +34,15 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-// Check if key combination matches any registered hotkey
+// Check if key combination matches any AGGRESSIVE mode hotkey
 void checkHotkeys(UINT vkCode, BOOL isKeyDown) {
     HotkeyManager& manager = HotkeyManager::getInstance();
     
     for (const auto& pair : manager.hotkeys) {
         const HotkeyEntry& entry = pair.second;
+        
+        // Only handle AGGRESSIVE mode via hook (COOPERATIVE uses WM_HOTKEY)
+        if (entry.mode == HotkeyMode::COOPERATIVE) continue;
         
         // Check if VK code matches
         if (entry.vkCode != vkCode) continue;
@@ -130,26 +133,25 @@ LRESULT CALLBACK HotkeyWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 }
 
 // Register a hotkey
-bool HotkeyManager::registerHotkey(int id, UINT modifiers, UINT vkCode, jobject callback, JNIEnv* env) {
-    // Registering hotkey
-    
+bool HotkeyManager::registerHotkey(int id, UINT modifiers, UINT vkCode, jobject callback, JNIEnv* env, int mode) {
     // Store the hotkey entry
     HotkeyEntry entry;
     entry.id = id;
     entry.modifiers = modifiers;
     entry.vkCode = vkCode;
     entry.callback = env->NewGlobalRef(callback);
+    entry.mode = static_cast<HotkeyMode>(mode);
     
     hotkeys[id] = entry;
     
-    // Register with Windows if message window exists
-    if (messageWindow != NULL) {
+    // COOPERATIVE mode: Register with Windows (may fail if taken)
+    if (entry.mode == HotkeyMode::COOPERATIVE && messageWindow != NULL) {
         BOOL result = RegisterHotKey(messageWindow, id, modifiers, vkCode);
-        // RegisterHotKey done
         return result != FALSE;
     }
     
-    // Stored hotkey for later
+    // AGGRESSIVE mode or window not ready: rely on low-level hook
+    // Always succeeds at registration time
     return true;
 }
 
@@ -298,8 +300,8 @@ bool HotkeyManager::isRunning() const {
 // JNI Implementation
 
 JNIEXPORT jboolean JNICALL Java_fasthotkey_FastHotkey_nativeRegisterHotkey
-    (JNIEnv* env, jclass clazz, jint id, jint modifiers, jint vkCode, jobject callback) {
-    return HotkeyManager::getInstance().registerHotkey(id, modifiers, vkCode, callback, env) ? JNI_TRUE : JNI_FALSE;
+    (JNIEnv* env, jclass clazz, jint id, jint modifiers, jint vkCode, jobject callback, jint mode) {
+    return HotkeyManager::getInstance().registerHotkey(id, modifiers, vkCode, callback, env, mode) ? JNI_TRUE : JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL Java_fasthotkey_FastHotkey_nativeUnregisterHotkey

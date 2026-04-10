@@ -9,12 +9,19 @@
 #include <atomic>
 #include <functional>
 
+// Hotkey modes
+enum class HotkeyMode {
+    COOPERATIVE = 0,  // Uses RegisterHotKey - can fail if taken
+    AGGRESSIVE = 1    // Uses low-level hook - always works
+};
+
 // Hotkey entry structure
 struct HotkeyEntry {
     int id;
     UINT modifiers;
     UINT vkCode;
     jobject callback;
+    HotkeyMode mode;
 };
 
 // Forward declaration for friend access
@@ -25,7 +32,7 @@ class HotkeyManager {
 public:
     static HotkeyManager& getInstance();
     
-    bool registerHotkey(int id, UINT modifiers, UINT vkCode, jobject callback, JNIEnv* env);
+    bool registerHotkey(int id, UINT modifiers, UINT vkCode, jobject callback, JNIEnv* env, int mode = 1);
     bool unregisterHotkey(int id);
     void unregisterAllHotkeys(JNIEnv* env);
     void startMessageLoop(JNIEnv* env);
@@ -54,7 +61,7 @@ private:
 // JNI function declarations
 extern "C" {
     JNIEXPORT jboolean JNICALL Java_fasthotkey_FastHotkey_nativeRegisterHotkey
-        (JNIEnv* env, jclass clazz, jint id, jint modifiers, jint vkCode, jobject callback);
+        (JNIEnv* env, jclass clazz, jint id, jint modifiers, jint vkCode, jobject callback, jint mode);
     
     JNIEXPORT jboolean JNICALL Java_fasthotkey_FastHotkey_nativeUnregisterHotkey
         (JNIEnv* env, jclass clazz, jint id);
