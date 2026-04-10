@@ -40,7 +40,7 @@ private:
     std::thread messageThread;
     HWND messageWindow = NULL;
     
-    static LRESULT CALLBACK windowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    friend LRESULT CALLBACK HotkeyWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     void messageLoop(JNIEnv* env);
     void notifyCallback(JNIEnv* env, const HotkeyEntry& entry);
 };

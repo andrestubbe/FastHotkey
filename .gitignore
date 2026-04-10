@@ -5,7 +5,8 @@ target/
 
 # IDE files
 .idea/
-.vscode/
+.vscode/*
+!.vscode/launch.json
 *.iml
 *.ipr
 *.iws

@@ -71,8 +71,8 @@ public final class KeyCodes {
     public static final int VK_DELETE = 0x2E;
     public static final int VK_HOME = 0x24;
     public static final int VK_END = 0x23;
-    public static final int VK_PRIOR = 0x21;  // Page Up
-    public static final int VK_NEXT = 0x22;     // Page Down
+    public static final int VK_PRIOR = 0x21;
+    public static final int VK_NEXT = 0x22;
     public static final int VK_UP = 0x26;
     public static final int VK_DOWN = 0x28;
     public static final int VK_LEFT = 0x25;

@@ -361,3 +361,5 @@ MIT License - See [LICENSE](LICENSE) file.
 
 - [FastClipboard](https://github.com/andrestubbe/FastClipboard) - Ultra-fast clipboard access
 - [FastRobot](https://github.com/andrestubbe/FastRobot) - High-performance screen capture
+- [FastGraphics](https://github.com/andrestubbe/FastGraphics) - GPU-accelerated graphics
+- [FastTheme](https://github.com/andrestubbe/FastTheme) - OS-aware Display/Theme monitor

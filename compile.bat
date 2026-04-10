@@ -80,7 +80,7 @@ echo Compiling FastHotkey v1.0 with Win32 Hotkey API...
 echo =====================================================
 cl /LD /Fe:build\fasthotkey.dll ^
     native\fasthotkey.cpp ^
-    user32.lib ^
+    user32.lib "%JAVA_HOME%\lib\jvm.lib" ^
     /I"%JAVA_HOME%\include" ^
     /I"%JAVA_HOME%\include\win32" ^
     /EHsc /std:c++17 /O2 /W3
