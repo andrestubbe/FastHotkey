@@ -17,6 +17,9 @@ struct HotkeyEntry {
     jobject callback;
 };
 
+// Forward declaration for friend access
+void checkHotkeys(UINT vkCode, BOOL isKeyDown);
+
 // Global state
 class HotkeyManager {
 public:
@@ -28,6 +31,7 @@ public:
     void startMessageLoop(JNIEnv* env);
     void stopMessageLoop(JNIEnv* env);
     bool isRunning() const;
+    void notifyCallback(JNIEnv* env, const HotkeyEntry& entry);
     
 private:
     HotkeyManager() = default;
@@ -39,10 +43,12 @@ private:
     std::atomic<bool> running{false};
     std::thread messageThread;
     HWND messageWindow = NULL;
+    HHOOK hHook = NULL;
     
     friend LRESULT CALLBACK HotkeyWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    friend LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+    friend void checkHotkeys(UINT vkCode, BOOL isKeyDown);
     void messageLoop(JNIEnv* env);
-    void notifyCallback(JNIEnv* env, const HotkeyEntry& entry);
 };
 
 // JNI function declarations

@@ -1,10 +1,82 @@
 #include "fasthotkey.h"
 #include <iostream>
 
+// Forward declarations
+LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+void checkHotkeys(UINT vkCode, BOOL isKeyDown);
+
+// Track key states for modifier detection
+static BOOL ctrlPressed = FALSE;
+static BOOL altPressed = FALSE;
+static BOOL shiftPressed = FALSE;
+static BOOL winPressed = FALSE;
+
+// Low-level keyboard hook procedure - intercepts ALL keys globally
+LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    if (nCode >= 0) {
+        KBDLLHOOKSTRUCT* kb = (KBDLLHOOKSTRUCT*)lParam;
+        BOOL isKeyDown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
+        
+        // Update modifier states
+        if (kb->vkCode == VK_LCONTROL || kb->vkCode == VK_RCONTROL) {
+            ctrlPressed = isKeyDown;
+        } else if (kb->vkCode == VK_LMENU || kb->vkCode == VK_RMENU) {
+            altPressed = isKeyDown;
+        } else if (kb->vkCode == VK_LSHIFT || kb->vkCode == VK_RSHIFT) {
+            shiftPressed = isKeyDown;
+        } else if (kb->vkCode == VK_LWIN || kb->vkCode == VK_RWIN) {
+            winPressed = isKeyDown;
+        } else if (isKeyDown) {
+            // Check if this key + current modifiers matches any hotkey
+            checkHotkeys(kb->vkCode, TRUE);
+        }
+    }
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
+
+// Check if key combination matches any registered hotkey
+void checkHotkeys(UINT vkCode, BOOL isKeyDown) {
+    HotkeyManager& manager = HotkeyManager::getInstance();
+    
+    for (const auto& pair : manager.hotkeys) {
+        const HotkeyEntry& entry = pair.second;
+        
+        // Check if VK code matches
+        if (entry.vkCode != vkCode) continue;
+        
+        // Check if modifiers match
+        BOOL modifiersMatch = TRUE;
+        if ((entry.modifiers & MOD_CONTROL) && !ctrlPressed) modifiersMatch = FALSE;
+        if ((entry.modifiers & MOD_ALT) && !altPressed) modifiersMatch = FALSE;
+        if ((entry.modifiers & MOD_SHIFT) && !shiftPressed) modifiersMatch = FALSE;
+        if ((entry.modifiers & MOD_WIN) && !winPressed) modifiersMatch = FALSE;
+        
+        if (modifiersMatch) {
+            // Hotkey triggered - no debug output
+            
+            // Get JNI environment for this thread
+            JavaVM* vm = nullptr;
+            jsize vmCount = 0;
+            JNI_GetCreatedJavaVMs(&vm, 1, &vmCount);
+            
+            if (vm != nullptr) {
+                JNIEnv* env = nullptr;
+                jint attachResult = vm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr);
+                
+                if (attachResult == JNI_OK && env != nullptr) {
+                    manager.notifyCallback(env, entry);
+                    vm->DetachCurrentThread();
+                    // Callback done
+                }
+            }
+        }
+    }
+}
+
 // DLL entry point
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
     if (reason == DLL_PROCESS_ATTACH) {
-        std::cout << "[DLL] FastHotkey DLL loaded!" << std::endl;
+        // DLL loaded
     }
     return TRUE;
 }
@@ -19,8 +91,7 @@ HotkeyManager& HotkeyManager::getInstance() {
 LRESULT CALLBACK HotkeyWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (msg == WM_HOTKEY) {
         int id = static_cast<int>(wParam);
-        std::cout << "[WINPROC] WM_HOTKEY received! ID=" << id << std::endl;
-        std::cout.flush();
+        // WM_HOTKEY received
         HotkeyManager& manager = HotkeyManager::getInstance();
         
         auto it = manager.hotkeys.find(id);
@@ -31,20 +102,20 @@ LRESULT CALLBACK HotkeyWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
             JNI_GetCreatedJavaVMs(&vm, 1, &vmCount);
             
             if (vm != nullptr) {
-                std::cout << "[WINPROC] Attaching thread to JVM..." << std::endl;
+                // Attaching thread to JVM
                 JNIEnv* env = nullptr;
                 jint attachResult = vm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr);
                 
                 if (attachResult == JNI_OK && env != nullptr) {
-                    std::cout << "[WINPROC] Calling Java callback..." << std::endl;
+                    // Calling Java callback
                     manager.notifyCallback(env, it->second);
                     vm->DetachCurrentThread();
-                    std::cout << "[WINPROC] Callback done!" << std::endl;
+                    // Callback done
                 } else {
-                    std::cout << "[WINPROC] Failed to attach thread! Result=" << attachResult << std::endl;
+                    // Failed to attach thread
                 }
             } else {
-                std::cout << "[WINPROC] No JVM found!" << std::endl;
+                // No JVM found
             }
         }
         return 0;
@@ -60,7 +131,7 @@ LRESULT CALLBACK HotkeyWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 // Register a hotkey
 bool HotkeyManager::registerHotkey(int id, UINT modifiers, UINT vkCode, jobject callback, JNIEnv* env) {
-    std::cout << "[REGISTER] Registering hotkey ID=" << id << ", modifiers=" << modifiers << ", vkCode=" << vkCode << std::endl;
+    // Registering hotkey
     
     // Store the hotkey entry
     HotkeyEntry entry;
@@ -74,11 +145,11 @@ bool HotkeyManager::registerHotkey(int id, UINT modifiers, UINT vkCode, jobject 
     // Register with Windows if message window exists
     if (messageWindow != NULL) {
         BOOL result = RegisterHotKey(messageWindow, id, modifiers, vkCode);
-        std::cout << "[REGISTER] RegisterHotKey result=" << result << std::endl;
+        // RegisterHotKey done
         return result != FALSE;
     }
     
-    std::cout << "[REGISTER] Stored hotkey (window not ready yet)" << std::endl;
+    // Stored hotkey for later
     return true;
 }
 
@@ -126,8 +197,7 @@ void HotkeyManager::notifyCallback(JNIEnv* env, const HotkeyEntry& entry) {
 
 // Message loop
 void HotkeyManager::messageLoop(JNIEnv* env) {
-    std::cout << "[MSGLOOP] Starting message loop..." << std::endl;
-    std::cout.flush();
+    // Starting message loop
     
     // Create message-only window
     WNDCLASSEX wc = {0};
@@ -137,8 +207,7 @@ void HotkeyManager::messageLoop(JNIEnv* env) {
     wc.lpszClassName = TEXT("FastHotkeyMessageWindow");
     
     ATOM regResult = RegisterClassEx(&wc);
-    std::cout << "[MSGLOOP] RegisterClassEx result=" << regResult << std::endl;
-    std::cout.flush();
+    // Window class registered
     
     messageWindow = CreateWindowEx(
         0,
@@ -154,40 +223,32 @@ void HotkeyManager::messageLoop(JNIEnv* env) {
     
     if (messageWindow == NULL) {
         DWORD err = GetLastError();
-        std::cout << "[MSGLOOP] FAILED to create window! Error=" << err << std::endl;
-        std::cout.flush();
+        // Failed to create window
         return;
     }
-    std::cout << "[MSGLOOP] Message window created: " << messageWindow << std::endl;
-    std::cout.flush();
+    // Message window created
     
-    // Register all pending hotkeys
-    std::cout << "[MSGLOOP] Registering " << hotkeys.size() << " pending hotkeys..." << std::endl;
-    std::cout.flush();
-    for (const auto& pair : hotkeys) {
-        BOOL result = RegisterHotKey(messageWindow, pair.first, pair.second.modifiers, pair.second.vkCode);
+    // Install low-level keyboard hook for global key interception
+    // This works even when RegisterHotKey fails (e.g., Windows owns Ctrl+Space)
+    // Installing keyboard hook
+    
+    hHook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, GetModuleHandle(NULL), 0);
+    if (hHook == NULL) {
         DWORD err = GetLastError();
-        std::cout << "[MSGLOOP] RegisterHotKey ID=" << pair.first << " modifiers=" << pair.second.modifiers 
-                  << " vk=" << pair.second.vkCode << " result=" << result;
-        if (!result) {
-            std::cout << " ERROR=" << err;
-        }
-        std::cout << std::endl;
-        std::cout.flush();
+        // Failed to install hook
+    } else {
+        // Keyboard hook installed
     }
     
     // Message loop
     MSG msg;
-    std::cout << "[MSGLOOP] Entering GetMessage loop..." << std::endl;
-    std::cout.flush();
+    // Entering message loop
     while (running.load() && GetMessage(&msg, NULL, 0, 0)) {
-        std::cout << "[MSGLOOP] Got message: " << msg.message << " wParam=" << msg.wParam << std::endl;
-        std::cout.flush();
+        // Got message
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    std::cout << "[MSGLOOP] Message loop ended!" << std::endl;
-    std::cout.flush();
+    // Message loop ended
     
     // Cleanup
     unregisterAllHotkeys(env);
@@ -198,9 +259,9 @@ void HotkeyManager::messageLoop(JNIEnv* env) {
 
 // Start message loop
 void HotkeyManager::startMessageLoop(JNIEnv* env) {
-    std::cout << "[START] Starting message loop thread..." << std::endl;
+    // Starting message loop thread
     if (running.load()) {
-        std::cout << "[START] Already running!" << std::endl;
+        // Already running
         return;
     }
     

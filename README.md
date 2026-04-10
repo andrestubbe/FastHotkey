@@ -9,6 +9,8 @@
 [![JitPack](https://jitpack.io/v/andrestubbe/fasthotkey.svg)](https://jitpack.io/#andrestubbe/fasthotkey)
 [![GitHub stars](https://img.shields.io/github/stars/andrestubbe/fasthotkey.svg)](https://github.com/andrestubbe/fasthotkey/stargazers)
 
+![FastHotkey Demo](docs/demo-screenshot.png)
+
 ```java
 // Quick Start — Global system-wide hotkeys
 FastHotkey.loadLibrary();
