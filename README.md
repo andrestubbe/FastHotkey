@@ -133,23 +133,15 @@ java --enable-native-access=ALL-UNNAMED -cp fasthotkey-1.1.0.jar;your-project.ja
 
 ---
 
+## Build from Source
+
+See [COMPILE.md](COMPILE.md) for detailed build instructions.
+
+---
+
 ## Quick Start
 
-### 1. Build the Native Library
-
-```batch
-compile.bat
-```
-
-This compiles the C++ code to `fasthotkey.dll` and copies it to resources.
-
-### 2. Build the Java Library
-
-```batch
-mvn clean package
-```
-
-### 3. Use in Your Code
+### 1. Use in Your Code
 
 ```java
 import fasthotkey.*;
@@ -337,37 +329,6 @@ fasthotkey/
 | **Maintenance** | Harder (C++ code + build scripts) | Easier (just Java interfaces) | N/A |
 
 FastHotkey uses **JNI** for maximum performance and to maintain consistency with the FastJava ecosystem (FastClipboard, FastRobot). While JNA would work for simple hotkey registration, JNI delivers the lowest possible latency for hotkey event handling.
-
-## Requirements
-
-- Windows 10/11 (Win32 API)
-- Java 17+
-- Visual Studio 2019+ (for building native code)
-
-## Build from Source
-
-### Prerequisites
-
-- JDK 17 or later
-- Visual Studio with C++ workload
-- Maven 3.8+
-
-### Build Steps
-
-1. **Compile native DLL:**
-   ```batch
-   compile.bat
-   ```
-
-2. **Build Java library:**
-   ```batch
-   mvn clean package
-   ```
-
-3. **Run demo:**
-   ```batch
-   java -cp target/fasthotkey-1.0.0.jar fasthotkey.Demo
-   ```
 
 ## How It Works
 
