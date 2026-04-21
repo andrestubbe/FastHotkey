@@ -1,17 +1,58 @@
+/**
+ * @file fasthotkey.cpp
+ * @brief FastHotkey native implementation - Global hotkey registration
+ *
+ * @details Implements system-wide hotkey capture for Java applications.
+ * Uses two complementary approaches:
+ * 1. RegisterHotKey API for cooperative mode (WM_HOTKEY messages)
+ * 2. WH_KEYBOARD_LL hook for aggressive mode (catches all keystrokes)
+ *
+ * @par Implementation Notes
+ * - Singleton pattern ensures single message loop
+ * - Thread-safe hotkey registration/unregistration
+ * - JNI thread attachment for Java callbacks
+ * - Automatic cleanup on DLL unload
+ *
+ * @par Security Considerations
+ * - WH_KEYBOARD_LL hook requires careful handling
+ * - Passes unhandled keys to next hook (CallNextHookEx)
+ * - No key logging - only checks registered combinations
+ *
+ * @author FastJava Team
+ * @version 1.0.0
+ * @copyright MIT License
+ */
+
 #include "fasthotkey.h"
 #include <iostream>
 
-// Forward declarations
+/// @name Forward Declarations
+/// @brief Windows callback function declarations
+/// @{
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 void checkHotkeys(UINT vkCode, BOOL isKeyDown);
+/// @}
 
-// Track key states for modifier detection
-static BOOL ctrlPressed = FALSE;
-static BOOL altPressed = FALSE;
-static BOOL shiftPressed = FALSE;
-static BOOL winPressed = FALSE;
+/// @name Modifier State Tracking
+/// @brief Global state for modifier key detection
+/// @{
+static BOOL ctrlPressed = FALSE;   /**< Control key state */
+static BOOL altPressed = FALSE;    /**< Alt key state */
+static BOOL shiftPressed = FALSE;  /**< Shift key state */
+static BOOL winPressed = FALSE;    /**< Windows key state */
+/// @}
 
-// Low-level keyboard hook procedure - intercepts ALL keys globally
+/**
+ * @brief Low-level keyboard hook procedure
+ * @details Intercepts ALL keystrokes system-wide for AGGRESSIVE mode hotkeys.
+ * Updates modifier state and checks for registered hotkey combinations.
+ * 
+ * @param nCode Hook code (HC_ACTION or < 0)
+ * @param wParam Key event type (WM_KEYDOWN, WM_KEYUP, etc.)
+ * @param lParam Pointer to KBDLLHOOKSTRUCT with key details
+ * @return Result from CallNextHookEx
+ * @note Always calls CallNextHookEx to pass keys to other applications
+ */
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode >= 0) {
         KBDLLHOOKSTRUCT* kb = (KBDLLHOOKSTRUCT*)lParam;
@@ -34,7 +75,16 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-// Check if key combination matches any AGGRESSIVE mode hotkey
+/**
+ * @brief Check if key combination matches registered hotkey
+ * @details Iterates through all registered hotkeys and checks if current
+ * key + modifier state matches any AGGRESSIVE mode registration.
+ * 
+ * @param vkCode Virtual key code that was pressed
+ * @param isKeyDown TRUE if key pressed, FALSE if released
+ * @note Attaches thread to JVM for callback invocation
+ * @see HotkeyManager::notifyCallback
+ */
 void checkHotkeys(UINT vkCode, BOOL isKeyDown) {
     HotkeyManager& manager = HotkeyManager::getInstance();
     
@@ -76,7 +126,13 @@ void checkHotkeys(UINT vkCode, BOOL isKeyDown) {
     }
 }
 
-// DLL entry point
+/**
+ * @brief DLL entry point
+ * @param hModule DLL module handle
+ * @param reason DLL event reason (DLL_PROCESS_ATTACH, etc.)
+ * @param lpReserved Reserved parameter
+ * @return TRUE on success
+ */
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
     if (reason == DLL_PROCESS_ATTACH) {
         // DLL loaded
@@ -84,13 +140,28 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
     return TRUE;
 }
 
-// Singleton instance
+/**
+ * @brief Get singleton instance
+ * @return Reference to HotkeyManager singleton
+ * @note Thread-safe due to C++11 static initialization
+ */
 HotkeyManager& HotkeyManager::getInstance() {
     static HotkeyManager instance;
     return instance;
 }
 
-// Window procedure for handling hotkey messages
+/**
+ * @brief Window procedure for message-only window
+ * @details Handles WM_HOTKEY messages for COOPERATIVE mode registrations.
+ * Attaches thread to JVM and invokes Java callback when hotkey triggered.
+ * 
+ * @param hwnd Window handle
+ * @param msg Message type
+ * @param wParam First message parameter (hotkey ID for WM_HOTKEY)
+ * @param lParam Second message parameter
+ * @return 0 if handled, DefWindowProc result otherwise
+ * @see HotkeyManager::notifyCallback
+ */
 LRESULT CALLBACK HotkeyWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (msg == WM_HOTKEY) {
         int id = static_cast<int>(wParam);
@@ -132,7 +203,21 @@ LRESULT CALLBACK HotkeyWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-// Register a hotkey
+/**
+ * @brief Register a global hotkey
+ * @details Stores hotkey entry and registers with Windows.
+ * For COOPERATIVE mode, uses RegisterHotKey API.
+ * For AGGRESSIVE mode, relies on low-level hook.
+ * 
+ * @param id Unique identifier for this hotkey
+ * @param modifiers Modifier flags (MOD_CONTROL, MOD_ALT, etc.)
+ * @param vkCode Virtual key code
+ * @param callback Java callback object (stored as global reference)
+ * @param env JNI environment
+ * @param mode Registration mode (0=COOPERATIVE, 1=AGGRESSIVE)
+ * @return true if registration succeeded
+ * @note Creates global reference to callback - must be freed on unregister
+ */
 bool HotkeyManager::registerHotkey(int id, UINT modifiers, UINT vkCode, jobject callback, JNIEnv* env, int mode) {
     // Store the hotkey entry
     HotkeyEntry entry;
@@ -155,7 +240,14 @@ bool HotkeyManager::registerHotkey(int id, UINT modifiers, UINT vkCode, jobject 
     return true;
 }
 
-// Unregister a hotkey
+/**
+ * @brief Unregister a specific hotkey
+ * @details Removes hotkey from internal map and unregisters from Windows.
+ * Frees global reference to Java callback.
+ * 
+ * @param id Hotkey identifier to unregister
+ * @return true if hotkey was found and removed
+ */
 bool HotkeyManager::unregisterHotkey(int id) {
     auto it = hotkeys.find(id);
     if (it == hotkeys.end()) {
@@ -171,7 +263,13 @@ bool HotkeyManager::unregisterHotkey(int id) {
     return true;
 }
 
-// Unregister all hotkeys
+/**
+ * @brief Unregister all hotkeys and cleanup
+ * @details Iterates through all registered hotkeys, unregisters from Windows,
+ * and deletes global references to Java callbacks.
+ * 
+ * @param env JNI environment
+ */
 void HotkeyManager::unregisterAllHotkeys(JNIEnv* env) {
     if (messageWindow != NULL) {
         for (const auto& pair : hotkeys) {
@@ -182,7 +280,15 @@ void HotkeyManager::unregisterAllHotkeys(JNIEnv* env) {
     hotkeys.clear();
 }
 
-// Notify Java callback
+/**
+ * @brief Invoke Java callback for triggered hotkey
+ * @details Gets callback class, finds onHotkey method, and invokes it
+ * with the hotkey ID as parameter.
+ * 
+ * @param env JNI environment
+ * @param entry Hotkey entry that was triggered
+ * @note Callback signature: void onHotkey(int id)
+ */
 void HotkeyManager::notifyCallback(JNIEnv* env, const HotkeyEntry& entry) {
     jclass callbackClass = env->GetObjectClass(entry.callback);
     if (callbackClass == nullptr) {
@@ -197,7 +303,14 @@ void HotkeyManager::notifyCallback(JNIEnv* env, const HotkeyEntry& entry) {
     env->CallVoidMethod(entry.callback, onHotkeyMethod, entry.id);
 }
 
-// Message loop
+/**
+ * @brief Main message loop
+ * @details Creates message-only window, installs keyboard hook if needed,
+ * and runs Windows message loop. Handles cleanup on exit.
+ * 
+ * @param env JNI environment
+ * @note Runs in separate thread - started by startMessageLoop()
+ */
 void HotkeyManager::messageLoop(JNIEnv* env) {
     // Starting message loop
     
@@ -259,7 +372,14 @@ void HotkeyManager::messageLoop(JNIEnv* env) {
     UnregisterClass(TEXT("FastHotkeyMessageWindow"), GetModuleHandle(NULL));
 }
 
-// Start message loop
+/**
+ * @brief Start message loop in separate thread
+ * @details Creates detached thread that runs messageLoop().
+ * Thread detaches automatically when complete.
+ * 
+ * @param env JNI environment
+ * @note Thread-safe - checks if already running
+ */
 void HotkeyManager::startMessageLoop(JNIEnv* env) {
     // Starting message loop thread
     if (running.load()) {
@@ -278,7 +398,13 @@ void HotkeyManager::startMessageLoop(JNIEnv* env) {
     messageThread.detach();
 }
 
-// Stop message loop
+/**
+ * @brief Stop message loop
+ * @details Sets running flag to false and posts WM_DESTROY
+ * to break the message loop.
+ * 
+ * @param env JNI environment
+ */
 void HotkeyManager::stopMessageLoop(JNIEnv* env) {
     if (!running.load()) {
         return;
@@ -292,34 +418,79 @@ void HotkeyManager::stopMessageLoop(JNIEnv* env) {
     }
 }
 
-// Check if running
+/**
+ * @brief Check if message loop is running
+ * @return true if message loop thread is active
+ */
 bool HotkeyManager::isRunning() const {
     return running.load();
 }
 
-// JNI Implementation
+/// @defgroup JNI_Implementation JNI Implementation
+/// @brief JNI function implementations
+/// @{
 
+/**
+ * @brief JNI: Register a global hotkey
+ * @param env JNI environment
+ * @param clazz FastHotkey class
+ * @param id Unique hotkey identifier
+ * @param modifiers Modifier flags (MOD_* constants)
+ * @param vkCode Virtual key code (VK_* constants)
+ * @param callback Java Runnable callback
+ * @param mode 0=COOPERATIVE, 1=AGGRESSIVE
+ * @return JNI_TRUE if registered successfully
+ * @see HotkeyManager::registerHotkey
+ */
 JNIEXPORT jboolean JNICALL Java_fasthotkey_FastHotkey_nativeRegisterHotkey
     (JNIEnv* env, jclass clazz, jint id, jint modifiers, jint vkCode, jobject callback, jint mode) {
     return HotkeyManager::getInstance().registerHotkey(id, modifiers, vkCode, callback, env, mode) ? JNI_TRUE : JNI_FALSE;
 }
 
+/**
+ * @brief JNI: Unregister a specific hotkey
+ * @param env JNI environment
+ * @param clazz FastHotkey class
+ * @param id Hotkey identifier to unregister
+ * @return JNI_TRUE if unregistered successfully
+ * @see HotkeyManager::unregisterHotkey
+ */
 JNIEXPORT jboolean JNICALL Java_fasthotkey_FastHotkey_nativeUnregisterHotkey
     (JNIEnv* env, jclass clazz, jint id) {
     return HotkeyManager::getInstance().unregisterHotkey(id) ? JNI_TRUE : JNI_FALSE;
 }
 
+/**
+ * @brief JNI: Start the message loop thread
+ * @param env JNI environment
+ * @param clazz FastHotkey class
+ * @see HotkeyManager::startMessageLoop
+ */
 JNIEXPORT void JNICALL Java_fasthotkey_FastHotkey_nativeStartMessageLoop
     (JNIEnv* env, jclass clazz) {
     HotkeyManager::getInstance().startMessageLoop(env);
 }
 
+/**
+ * @brief JNI: Stop the message loop thread
+ * @param env JNI environment
+ * @param clazz FastHotkey class
+ * @see HotkeyManager::stopMessageLoop
+ */
 JNIEXPORT void JNICALL Java_fasthotkey_FastHotkey_nativeStopMessageLoop
     (JNIEnv* env, jclass clazz) {
     HotkeyManager::getInstance().stopMessageLoop(env);
 }
 
+/**
+ * @brief JNI: Unregister all hotkeys and cleanup
+ * @param env JNI environment
+ * @param clazz FastHotkey class
+ * @see HotkeyManager::unregisterAllHotkeys
+ */
 JNIEXPORT void JNICALL Java_fasthotkey_FastHotkey_nativeUnregisterAll
     (JNIEnv* env, jclass clazz) {
     HotkeyManager::getInstance().unregisterAllHotkeys(env);
 }
+
+/** @} */
