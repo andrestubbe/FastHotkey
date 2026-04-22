@@ -1,4 +1,4 @@
-# FastHotkey — Global Hotkey Library for Java via JNI (System-Wide Hotkeys)
+# FastHotkey — Global Hotkey Library for Java via JNI (System-Wide Hotkeys) [ALPHA]
 
 **⚡ Ultra-fast global hotkey library for Java — system-wide hotkeys even when your app is not focused**
 
