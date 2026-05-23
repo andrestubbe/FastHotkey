@@ -1,4 +1,4 @@
-﻿# FastHotkey â€” Low-Latency Global Hotkey API for Java [v0.1.0]
+﻿# FastHotkey — Low-Latency Global Hotkey API for Java [v0.1.0]
 
 **A zero-overhead native module for the FastJava ecosystem. Register and handle global system hotkeys with minimal latency.**
 
@@ -17,10 +17,10 @@
 - [License](#license)
 
 ## Features
-- **âŒ¨ï¸ Global Hooks**: Register hotkeys that work system-wide.
-- **âš¡ Low Latency**: Native Win32 integration for instant event delivery.
-- **ðŸ“¦ Zero Overhead**: Pure JNI implementation bypassing heavy Java input layers.
-- **ðŸš€ Focus Agnostic**: Works perfectly in the background or for system-wide tools.
+- **⌨️ Global Hooks**: Register hotkeys that work system-wide.
+- **⚡ Low Latency**: Native Win32 integration for instant event delivery.
+- **📦 Zero Overhead**: Pure JNI implementation bypassing heavy Java input layers.
+- **🚀 Focus Agnostic**: Works perfectly in the background or for system-wide tools.
 
 ## Installation
 
@@ -75,9 +75,9 @@ Download the latest JARs directly to add them to your classpath:
 
 
 ## License
-MIT License â€” See [LICENSE](LICENSE) for details.
+MIT License — See [LICENSE](LICENSE) for details.
 
 ---
-**Part of the FastJava Ecosystem** â€” *Making the JVM faster.*
+**Part of the FastJava Ecosystem** — *Making the JVM faster.*
 
 
