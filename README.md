@@ -114,10 +114,12 @@ MIT License — See [LICENSE](LICENSE) file for details.
 ---
 
 ## Related Projects
-
-- [FastFileIndex](https://github.com/andrestubbe/FastFileIndex) — Ultra-fast filesystem scanner
-- [FastTheme](https://github.com/andrestubbe/FastTheme) — High-performance native window styling
-- [FastThumb](https://github.com/andrestubbe/FastThumb) — Native Shell Image Engine
+- [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader & JNI Utilities for Java
+- [FastMouse](https://github.com/andrestubbe/FastMouse) — High-Performance Native Mouse API for Java
+- [FastKeyboard](https://github.com/andrestubbe/FastKeyboard) — Native Windows RawInput API for Java
+- [FastKeylogger](https://github.com/andrestubbe/FastKeylogger) — Behavioral Typing Logic for Java
+- [FastTouch](https://github.com/andrestubbe/FastTouch) — Native touchscreen input for Java
+- [FastStylus](https://github.com/andrestubbe/FastStylus) — Native Stylus/Pen Input for Java
 
 ---
 
