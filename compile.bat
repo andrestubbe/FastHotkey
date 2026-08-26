@@ -9,7 +9,11 @@ echo.
 :: Check for Java
 if not defined JAVA_HOME (
     :: Try to find Java automatically
-    if exist "C:\Program Files\Java\jdk-25\include\jni.h" (
+    if exist "C:\Program Files\Java\jdk-26.0.2.1\include\jni.h" (
+        set "JAVA_HOME=C:\Program Files\Java\jdk-26.0.2.1"
+    ) else if exist "C:\Program Files\Java\jdk-26\include\jni.h" (
+        set "JAVA_HOME=C:\Program Files\Java\jdk-26"
+    ) else if exist "C:\Program Files\Java\jdk-25\include\jni.h" (
         set "JAVA_HOME=C:\Program Files\Java\jdk-25"
     ) else if exist "C:\Program Files\Java\jdk-21\include\jni.h" (
         set "JAVA_HOME=C:\Program Files\Java\jdk-21"

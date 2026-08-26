@@ -179,43 +179,27 @@ private:
  * @param mode 0=COOPERATIVE, 1=AGGRESSIVE
  * @return JNI_TRUE if registered successfully
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 JNIEXPORT jboolean JNICALL Java_fasthotkey_FastHotkey_nativeRegisterHotkey
     (JNIEnv* env, jclass clazz, jint id, jint modifiers, jint vkCode, jobject callback, jint mode);
 
-/**
- * @brief Unregister a specific hotkey
- * @param env JNI environment
- * @param clazz FastHotkey class
- * @param id Hotkey identifier to unregister
- * @return JNI_TRUE if unregistered successfully
- */
 JNIEXPORT jboolean JNICALL Java_fasthotkey_FastHotkey_nativeUnregisterHotkey
     (JNIEnv* env, jclass clazz, jint id);
 
-/**
- * @brief Start the message loop thread
- * @param env JNI environment
- * @param clazz FastHotkey class
- */
 JNIEXPORT void JNICALL Java_fasthotkey_FastHotkey_nativeStartMessageLoop
     (JNIEnv* env, jclass clazz);
 
-/**
- * @brief Stop the message loop thread
- * @param env JNI environment
- * @param clazz FastHotkey class
- */
 JNIEXPORT void JNICALL Java_fasthotkey_FastHotkey_nativeStopMessageLoop
     (JNIEnv* env, jclass clazz);
 
-/**
- * @brief Unregister all hotkeys and cleanup
- * @param env JNI environment
- * @param clazz FastHotkey class
- */
 JNIEXPORT void JNICALL Java_fasthotkey_FastHotkey_nativeUnregisterAll
     (JNIEnv* env, jclass clazz);
 
-/** @} */
+#ifdef __cplusplus
+}
+#endif
 
 #endif // FASTHOTKEY_H
