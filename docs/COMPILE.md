@@ -37,7 +37,7 @@ See README.md for usage examples.
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>fasthotkey</artifactId>
-        <version>v1.0.0</version>
+        <version>0.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -50,7 +50,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fasthotkey:v1.0.0'
+    implementation 'com.github.andrestubbe:fasthotkey:0.1.0'
 }
 ```
 

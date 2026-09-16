@@ -1,4 +1,4 @@
-# FastHotkey 0.1.0 [ALPHA-2026-08-19] — Ultra-Low Latency Global Hotkey Engine for Java
+# FastHotkey 0.1.0 [ALPHA-2026-05-23] — Ultra-Low Latency Global Hotkey Engine for Java
 
 [![Status](https://img.shields.io/badge/status-0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastHotkey/releases/tag/0.1.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
