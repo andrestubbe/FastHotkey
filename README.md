@@ -225,10 +225,11 @@ Download the latest JARs directly to add them to your classpath:
 
 ## Platform Support
 
-| Platform | Status |
-|---|:---:|
-| **Windows 10 / 11 (x64)** | ✅ Fully Supported (Win32 `RegisterHotKey` + `WH_KEYBOARD_LL`) |
-| **Linux / macOS** | 🚧 Planned (X11/Wayland & Cocoa integration) |
+| Platform | Architecture | Status | Driver / Subsystem |
+|:---|:---:|:---:|:---|
+| **Windows 10 / 11** | x64 | ✅ Fully Supported | Native Win32 `RegisterHotKey` & Low-Level Hook (`WH_KEYBOARD_LL`) |
+| **Linux** | x64 / AArch64 | 🚧 Planned | X11 `XGrabKey` & Wayland Global Shortcuts Portal |
+| **macOS** | Apple Silicon / x64 | 🚧 Planned | Carbon `RegisterEventHotKey` & Quartz Event Taps |
 
 ---
 
