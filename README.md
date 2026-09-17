@@ -83,6 +83,13 @@ Standard Java keyboard handling (AWT `KeyEventDispatcher`, Swing key bindings, o
 - **Aggressive Override Support**: Low-level keyboard hooks (`WH_KEYBOARD_LL`) allow overriding system-claimed hotkeys such as `Ctrl+Space`.
 - **Zero GC Allocation**: Hot-path dispatch triggers direct primitive callbacks without allocating temporary event objects.
 
+| Feature | Java AWT / Swing KeyEvents | JNativeHook (Global Hook) | FastHotkey |
+|:---|:---|:---|:---|
+| **System-Wide Reach** | Active window focus only | Global hooks via JNI | **Global (Active window or background)** |
+| **Dispatch Latency** | EDT queued (10–50 ms jitter) | ~1–5 ms (wrapper thread) | **Sub-microsecond (< 1 µs Win32 pump)** |
+| **System Shortcut Override**| Not possible | Cooperative only | **Aggressive mode (`WH_KEYBOARD_LL` override)**|
+| **Heap / GC Overhead** | Allocates `KeyEvent` instances | Allocates NativeKeyEvent objects | **Zero GC (Primitive callback dispatch)** |
+
 ---
 
 ## Key Features
